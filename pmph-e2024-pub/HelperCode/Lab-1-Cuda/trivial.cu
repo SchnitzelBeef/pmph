@@ -9,7 +9,7 @@
 #define GPU_RUNS 100
 
 __global__ void mul2Kernel(float* X, float *Y, int N) {
-    const unsigned int gid = blockIdx.x * blockDim.x threadIdx.x;
+    const unsigned int gid = blockIdx.x * blockDim.x + threadIdx.x;
     if (gid < N) Y[gid] = 2 * X[gid];
 }
 
@@ -55,12 +55,12 @@ int main(int argc, char** argv) {
     // copy host memory to device
     cudaMemcpy(d_in, h_in, mem_size, cudaMemcpyHostToDevice);
 
-    unsigned int block_size = 256;
-    unsigned int grid = (N + block_size - 1) / block_size 
+    unsigned int B = 256;
+    unsigned int numblocks = (N + B - 1) / B;
     
     // a small number of dry runs
     for(int r = 0; r < 1; r++) {
-        dim3 block(block_size, 1, 1), grid(grid, 1, 1)
+        dim3 block(B, 1, 1), grid(numblocks, 1, 1);
         mul2Kernel<<< 1, N>>>(d_in, d_out, N);
     }
   
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
         gettimeofday(&t_start, NULL);
 
         for(int r = 0; r < GPU_RUNS; r++) {
-            mul2Kernel<<< 1, N>>>(d_in, d_out);
+            mul2Kernel<<< 1, N>>>(d_in, d_out, N);
         }
         cudaDeviceSynchronize();
         // ^ `cudaDeviceSynchronize` is needed for runtime
@@ -102,6 +102,7 @@ int main(int argc, char** argv) {
     gpuAssert( cudaPeekAtLastError() );
 
     // copy result from ddevice to host
+
     cudaMemcpy(h_out, d_out, mem_size, cudaMemcpyDeviceToHost);
 
     // print result
