@@ -16,6 +16,9 @@
 -- }
 -- "Pattern-200000010-elements" script input { mk_input 10000000i64 }
 -- output { 2i32 }
+--
+-- compiled random input { [100000000]i32 }
+
 
 entry mk_input (n:i64) : [20*n+10]i32 =
    let pattern = [-100i32, 10, 3, -1, 4, -1, 5, 1, 1, -100]
