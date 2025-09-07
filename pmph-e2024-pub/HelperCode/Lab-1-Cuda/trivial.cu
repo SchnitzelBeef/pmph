@@ -8,9 +8,9 @@
 
 #define GPU_RUNS 100
 
-__global__ void mul2Kernel(float* X, float *Y) {
-    const unsigned int gid = threadIdx.x;
-    Y[gid] = 2 * X[gid];
+__global__ void mul2Kernel(float* X, float *Y, int N) {
+    const unsigned int gid = blockIdx.x * blockDim.x threadIdx.x;
+    if (gid < N) Y[gid] = 2 * X[gid];
 }
 
 int main(int argc, char** argv) {
@@ -55,9 +55,13 @@ int main(int argc, char** argv) {
     // copy host memory to device
     cudaMemcpy(d_in, h_in, mem_size, cudaMemcpyHostToDevice);
 
+    unsigned int block_size = 256;
+    unsigned int grid = (N + block_size - 1) / block_size 
+    
     // a small number of dry runs
     for(int r = 0; r < 1; r++) {
-        mul2Kernel<<< 1, N>>>(d_in, d_out);
+        dim3 block(block_size, 1, 1), grid(grid, 1, 1)
+        mul2Kernel<<< 1, N>>>(d_in, d_out, N);
     }
   
     { // execute the kernel a number of times;
