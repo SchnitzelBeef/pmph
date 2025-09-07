@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
     // a small number of dry runs
     for(int r = 0; r < 1; r++) {
         dim3 block(B, 1, 1), grid(numblocks, 1, 1);
-        mul2Kernel<<< 1, N>>>(d_in, d_out, N);
+        mul2Kernel<<< grid, block>>>(d_in, d_out, N);
     }
   
     { // execute the kernel a number of times;
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
         for(int r = 0; r < GPU_RUNS; r++) {
             dim3 block(B, 1, 1), grid(numblocks, 1, 1);
-            mul2Kernel<<< 1, N>>>(d_in, d_out, N);
+            mul2Kernel<<< grid, block>>>(d_in, d_out, N);
         }
         cudaDeviceSynchronize();
         // ^ `cudaDeviceSynchronize` is needed for runtime
