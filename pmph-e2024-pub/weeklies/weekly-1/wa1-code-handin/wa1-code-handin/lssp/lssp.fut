@@ -21,13 +21,26 @@ let lss_redOp (pred2: i32 -> i32 -> bool)
   -- Weekly 1, task 2 -- LSSP
   -- TODO: fill in the 5 missing values (indicated by `???`).
   let segments_connect =
-    if pred2 x_last y_first
-      then (x_lcs + y_lis)
-      else 0
+    if x_len == 0
+      then y_lis
+      else if y_len == 0
+        then x_lcs
+        else if pred2 x_last y_first
+          then x_lcs + y_lis
+          else 0
 
   let new_lss = segments_connect `max` x_lss `max` y_lss
-  let new_lis = x_lis
-  let new_lcs = y_lcs
+
+  let new_lis =
+    if x_lis == x_len && pred2 x_last y_first
+      then x_len + y_lis  
+      else x_lis
+  
+  let new_lcs = 
+    if y_lcs == y_len && pred2 x_last y_first
+      then y_len + x_lcs
+      else y_lcs
+  
   let new_len = x_len + y_len
 
   let new_first = if x_len == 0 then y_first else x_first

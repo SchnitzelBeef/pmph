@@ -7,6 +7,12 @@
 -- output {
 --    5i32
 -- }
+-- compiled input {
+--    [1, 1, 1, 0, 0, 1, 2, 4, 5, 2, 2, 5, 5]
+-- }
+-- output {
+--    3
+-- }
 
 import "lssp"
 import "lssp-seq"
@@ -14,5 +20,5 @@ import "lssp-seq"
 let main (xs: []i32) : i32 =
   let pred1 _x = true
   let pred2 x y = (x == y)
---  in  lssp_seq pred1 pred2 xs
+    -- in  lssp_seq pred1 pred2 xs
   in  lssp pred1 pred2 xs
