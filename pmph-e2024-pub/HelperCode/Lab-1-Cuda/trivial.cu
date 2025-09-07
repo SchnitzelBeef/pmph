@@ -72,6 +72,7 @@ int main(int argc, char** argv) {
         gettimeofday(&t_start, NULL);
 
         for(int r = 0; r < GPU_RUNS; r++) {
+            dim3 block(B, 1, 1), grid(numblocks, 1, 1);
             mul2Kernel<<< 1, N>>>(d_in, d_out, N);
         }
         cudaDeviceSynchronize();
