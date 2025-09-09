@@ -98,8 +98,8 @@ int main(int argc, char** argv) {
         gpu_gigabytespersec = (2.0 * N * 4.0) / (gpu_elapsed * 1000.0);
         printf("The kernel took on average %f microseconds. GB/sec: %f \n", gpu_elapsed, gpu_gigabytespersec);
     
-        double speedup = (gpu_elapsed - cpu_elapsed) / gpu_elapsed;
-        printf("Speedup = (gpu_elapsed - cpu_elapsed) / gpu_elased: %f \n", speedup);
+        double speedup = (cpu_elapsed - gpu_elapsed) / cpu_elapsed;
+        printf("Speedup := (cpu_elapsed - gpu_elapsed) / cpu_elapsed = %f \n", speedup);
     }
         
     // check for errors
