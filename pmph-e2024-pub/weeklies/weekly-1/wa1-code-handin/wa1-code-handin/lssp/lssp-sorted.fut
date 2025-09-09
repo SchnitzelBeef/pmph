@@ -7,11 +7,24 @@
 -- output { 
 --    9
 -- }
+-- Added tests:
+-- compiled input {
+--    [1, 1, 1, 0, 0, 1, 2, 4, 5, 2, 2, 5, 5]
+-- }
+-- output {
+--    6
+-- }
 -- compiled input {
 --    [3, 2, 1, 2, 3, 4, 1, 2, 3, 4, 2, 2, 2, 1, 2, 3, 4, 5]
 -- }  
 -- output { 
 --    5
+-- }
+-- compiled input {
+--    [1, 4, 1, 2, 0, 0, 2, 4, 5, 0, 0, 0, 0, 1, 2, 0]
+-- }
+-- output { 
+--    6
 -- }
 --
 -- compiled random input { [100000000]i32 }

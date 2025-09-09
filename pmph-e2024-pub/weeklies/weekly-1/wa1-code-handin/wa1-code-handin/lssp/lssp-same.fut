@@ -8,11 +8,24 @@
 -- output {
 --    5i32
 -- }
+-- Added tests:
 -- compiled input {
 --    [1, 1, 1, 0, 0, 1, 2, 4, 5, 2, 2, 5, 5]
 -- }
 -- output {
 --    3
+-- }
+-- compiled input {
+--    [3, 2, 1, 2, 3, 4, 1, 2, 3, 4, 2, 2, 2, 1, 2, 3, 4, 5]
+-- }  
+-- output { 
+--    3
+-- }
+-- compiled input {
+--    [1, 4, 1, 2, 0, 0, 2, 4, 5, 0, 0, 0, 0, 1, 2, 0]
+-- }
+-- output { 
+--    4
 -- }
 -- "Pattern-200000010-elements" script input { mk_input 10000000i64 }
 -- output { 2i32 }
