@@ -100,16 +100,41 @@ let sgmSumF32 [n] (flags: [n]bool) (vals: [n]f32) : [n]f32 =
 ---    with a map that extracts the last element  ---
 ---    of the segment.
 -----------------------------------------------------
+
+let mkFlagArray 't [m] 
+            (aoa_shp: [m]i64) (zero: t)   --aoa_shp=[0,3,1,0,4,2,0]
+            (aoa_val: [m]t  ) : []t   =   --aoa_val=[1,1,1,1,1,1,1]
+  let shp_rot = map (\i->if i==0 then 0   --shp_rot=[0,0,3,1,0,4,2]
+                         else aoa_shp[i-1]
+                    ) (iota m)
+  let shp_scn = scan (+) 0 shp_rot       --shp_scn=[0,0,3,4,4,8,10]
+  let aoa_len = if m == 0 then 0         --aoa_len= 10
+                else shp_scn[m-1]+aoa_shp[m-1]
+  let shp_ind = map2 (\shp ind ->        --shp_ind= 
+                       if shp==0 then -1 --  [-1,0,3,-1,4,8,-1]
+                       else ind          --scatter
+                     ) aoa_shp shp_scn   --   [0,0,0,0,0,0,0,0,0,0]
+  in scatter (replicate aoa_len zero)    --   [-1,0,3,-1,4,8,-1]
+             shp_ind aoa_val             --   [1,1,1,1,1,1,1]
+                                     -- res = [1,0,0,1,1,0,0,0,1,0] 
+
+-- let segmented_scan [n] 't 
+--                  (op: t -> t -> t) (ne: t)
+--                  (flags )
+
 let spMatVctMult [num_elms][vct_len][num_rows]
                  (mat_val: [num_elms](i64, f32))
                  (mat_shp: [num_rows]i64)
                  (vct: [vct_len]f32)
                    : [num_rows]f32 =
 
-  let shp_sc = scan (+) 0 mat_shp
+  let shp_sc = scan (+) 0 mat_shp -- [num_rows]i32
   -- TODO: fill in your implementation here.
   --       for now, the function simply returns zeroes.
-   in replicate num_rows 0.0f32
+  let flag = map (== 1) (mkFlagArray mat_shp 0 (replicate num_rows 1i32)) :> [num_elms]bool
+  let mult = map (\(i, v) -> vct[i] * v) mat_val -- [num_elms]f32
+  let sum_p = sgmScan (+) 0 flag mult -- [num_elms]f32
+   in map (\i -> sum_p[i-1]) shp_sc
 
 -- One may run with for example:
 -- $ futhark dataset --i64-bounds=0:9999 -g [1000000]i64 --f32-bounds=-7.0:7.0 -g [1000000]f32 --i64-bounds=100:100 -g [10000]i64 --f32-bounds=-10.0:10.0 -g [10000]f32 | ./spMVmult-seq -t /dev/stderr -n
