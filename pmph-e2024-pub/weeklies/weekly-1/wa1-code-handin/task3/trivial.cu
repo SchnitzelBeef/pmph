@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     // initialize the memory
     for(unsigned int i=0; i<N; ++i) {
         h_in[i] = (float)i;
-        h_in[i+N] = (float)i*2;
+        h_in[N+i] = (float)(i*2);
     }
 
 
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     // allocate device memory
     float* d_in;
     float* d_out;
-    cudaMalloc((void**)&d_in,  mem_size);
+    cudaMalloc((void**)&d_in,  mem_size*2);
     cudaMalloc((void**)&d_out, mem_size);
 
     // copy host memory to device
