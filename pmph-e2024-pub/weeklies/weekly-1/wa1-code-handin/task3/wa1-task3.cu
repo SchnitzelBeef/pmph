@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
     }
 
     // sequential map on CPU with time measured
-    double elapsed; struct timeval t_start, t_end, t_diff;
+    double cpu_elapsed; double cpu_gigabytespersec; struct timeval t_start, t_end, t_diff;
     gettimeofday(&t_start, NULL);
 
     for (unsigned int i = 0; i < N; i++){
@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
 
     gettimeofday(&t_end, NULL);
     timeval_subtract(&t_diff, &t_end, &t_start);
-    elapsed = (1.0 * (t_diff.tv_sec*1e6+t_diff.tv_usec));
-    double gigabytespersec = (2.0 * N * 4.0) / (elapsed * 1000.0);
-    printf("The cpu took on average %f microseconds. GB/sec: %f \n", elapsed, gigabytespersec);
+    cpu_elapsed = (1.0 * (t_diff.tv_sec*1e6+t_diff.tv_usec));
+    cpu_gigabytespersec = (2.0 * N * 4.0) / (cpu_elapsed * 1000.0);
+    printf("The cpu took on average %f microseconds. GB/sec: %f \n", cpu_elapsed, cpu_gigabytespersec);
 
     // allocate device memory
     float* d_in;
@@ -81,9 +81,9 @@ int main(int argc, char** argv) {
         dim3 block(B, 1, 1), grid(numblocks, 1, 1);
         mul2Kernel<<< grid, block>>>(d_in, d_out, N);
     }
-  
+
     {
-        double elapsed; struct timeval t_start, t_end, t_diff;
+        double gpu_elapsed; double gpu_gigabytespersec; struct timeval t_start, t_end, t_diff;
         gettimeofday(&t_start, NULL);
 
         for(int r = 0; r < GPU_RUNS; r++) {
@@ -94,10 +94,12 @@ int main(int argc, char** argv) {
         
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
-        elapsed = (1.0 * (t_diff.tv_sec*1e6+t_diff.tv_usec)) / GPU_RUNS;
-        double gigabytespersec = (2.0 * N * 4.0) / (elapsed * 1000.0);
-        printf("The kernel took on average %f microseconds. GB/sec: %f \n", elapsed, gigabytespersec);
-        
+        gpu_elapsed = (1.0 * (t_diff.tv_sec*1e6+t_diff.tv_usec)) / GPU_RUNS;
+        gpu_gigabytespersec = (2.0 * N * 4.0) / (gpu_elapsed * 1000.0);
+        printf("The kernel took on average %f microseconds. GB/sec: %f \n", gpu_elapsed, gpu_gigabytespersec);
+    
+        double speedup = (gpu_elapsed - cpu_elapsed) / gpu_elapsed;
+        printf("Speedup = (gpu_elapsed - cpu_elapsed) / gpu_elased: %f", speedup);
     }
         
     // check for errors
