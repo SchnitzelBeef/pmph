@@ -116,10 +116,14 @@ int main(int argc, char** argv) {
 
     cudaMemcpy(gpu_res, d_out, mem_size, cudaMemcpyDeviceToHost);
 
+    // print result
+    for(unsigned int i=0; i<N; ++i) printf("GPU: %.6f\n", gpu_res[i]);
+    for(unsigned int i=0; i<N; ++i) printf("CPU: %.6f\n", cpu_res[i]);
+
     // element-wise compare of CPU and GPU execution
     for (unsigned int i = 0; i < N; i++) {
-        float actual = cpu_res[i];
-        float expected = gpu_res[i];
+        float expected = cpu_res[i];
+        float actual = gpu_res[i];
         if (fabs(actual - expected >= 0.000001)) {
             printf("Invalid result at index %d, actual: %f, expected: %f. \n", i, actual, expected);
             exit(3);
