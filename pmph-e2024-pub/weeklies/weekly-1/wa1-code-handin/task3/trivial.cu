@@ -10,8 +10,8 @@
  
 __global__ void mul2Kernel(float* X, float *Y, int N, int numblocks) {
     const unsigned int gid_x = blockIdx.x * blockDim.x + threadIdx.x;
-    const unsigned int gid_y = gid_x + blockDim.x*numblocks/2;
-    if (gid_x < N) Y[gid_x] = X[gid_x] * X[gid_y];
+    const unsigned int gid_y = gid_x + N;
+    if (gid_x < N) Y[gid_x] = gid_y;
 }
 
 int main(int argc, char** argv) {
@@ -37,16 +37,17 @@ int main(int argc, char** argv) {
     cudaSetDevice(0);
 
     unsigned int mem_size = N*sizeof(float);
+    unsigned int gpu_mem_size_in = mem_size*2;
 
     // allocate host memory for both CPU and GPU
-    float* h_in  = (float*) malloc(mem_size*2);
+    float* h_in  = (float*) malloc(gpu_mem_size_in);
     float* gpu_res = (float*) malloc(mem_size);
     float* cpu_res = (float*) malloc(mem_size);
 
     // initialize the memory
     for(unsigned int i=0; i<N; ++i) {
         h_in[i] = (float)i;
-        h_in[N+i] = (float)(i*2);
+        h_in[N+i] = (float)(i+2);
     }
 
 
@@ -59,11 +60,11 @@ int main(int argc, char** argv) {
     // allocate device memory
     float* d_in;
     float* d_out;
-    cudaMalloc((void**)&d_in,  mem_size*2);
+    cudaMalloc((void**)&d_in,  gpu_mem_size_in);
     cudaMalloc((void**)&d_out, mem_size);
 
     // copy host memory to device
-    cudaMemcpy(d_in, h_in, mem_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_in, h_in, gpu_mem_size_in, cudaMemcpyHostToDevice);
 
     unsigned int B = 256;
     unsigned int numblocks = (N + B - 1) / B;
