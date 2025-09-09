@@ -6,12 +6,12 @@
 
 #include "helper.h"
 
-#define GPU_RUNS 100
+#define GPU_RUNS 300
  
-__global__ void mul2Kernel(float* X, float *Y, int N, int numblocks) {
+__global__ void mul2Kernel(float* X, float *Y, int N) {
     const unsigned int gid_x = blockIdx.x * blockDim.x + threadIdx.x;
     const unsigned int gid_y = gid_x + N;
-    if (gid_x < N) Y[gid_x] = gid_y;
+    if (gid_x < N) Y[gid_x] = X[gid_x] * X[gid_y];
 }
 
 int main(int argc, char** argv) {
@@ -50,12 +50,19 @@ int main(int argc, char** argv) {
         h_in[N+i] = (float)(i+2);
     }
 
+    // sequential map on CPU with time measured
+    double elapsed; struct timeval t_start, t_end, t_diff;
+    gettimeofday(&t_start, NULL);
 
-    // sequential map on CPU
     for (unsigned int i = 0; i < N; i++){
         cpu_res[i] = h_in[i] * h_in[i+N];
     }
 
+    gettimeofday(&t_end, NULL);
+    timeval_subtract(&t_diff, &t_end, &t_start);
+    elapsed = (1.0 * (t_diff.tv_sec*1e6+t_diff.tv_usec));
+    double gigabytespersec = (2.0 * N * 4.0) / (elapsed * 1000.0);
+    printf("The cpu took on average %f microseconds. GB/sec: %f \n", elapsed, gigabytespersec);
 
     // allocate device memory
     float* d_in;
@@ -72,35 +79,18 @@ int main(int argc, char** argv) {
     // a small number of dry runs
     for(int r = 0; r < 1; r++) {
         dim3 block(B, 1, 1), grid(numblocks, 1, 1);
-        mul2Kernel<<< grid, block>>>(d_in, d_out, N, numblocks);
+        mul2Kernel<<< grid, block>>>(d_in, d_out, N);
     }
   
-    { // execute the kernel a number of times;
-      // to measure performance use a large N, e.g., 200000000,
-      // and increase GPU_RUNS to 100 or more. 
-    
+    {
         double elapsed; struct timeval t_start, t_end, t_diff;
         gettimeofday(&t_start, NULL);
 
         for(int r = 0; r < GPU_RUNS; r++) {
             dim3 block(B, 1, 1), grid(numblocks, 1, 1);
-            mul2Kernel<<< grid, block>>>(d_in, d_out, N, numblocks);
+            mul2Kernel<<< grid, block>>>(d_in, d_out, N);
         }
         cudaDeviceSynchronize();
-        // ^ `cudaDeviceSynchronize` is needed for runtime
-        //     measurements, since CUDA kernels are executed
-        //     asynchronously, i.e., the CPU does not wait
-        //     for the kernel to finish.
-        //   However, `cudaDeviceSynchronize` is expensive
-        //     so we need to amortize it across many runs;
-        //     hence, when measuring performance use a big
-        //     N and increase GPU_RUNS to 100 or more.
-        //   Sure, it would be better by using CUDA events, but
-        //     the current procedure is simple & works well enough.
-        //   Please note that the execution of multiple
-        //     kernels in Cuda executes correctly without such
-        //     explicit synchronization; we need this only for
-        //     runtime measurement.
         
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
@@ -114,7 +104,6 @@ int main(int argc, char** argv) {
     gpuAssert( cudaPeekAtLastError() );
 
     // copy result from device to host
-
     cudaMemcpy(gpu_res, d_out, mem_size, cudaMemcpyDeviceToHost);
 
     // print result
