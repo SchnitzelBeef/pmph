@@ -128,13 +128,12 @@ let spMatVctMult [num_elms][vct_len][num_rows]
                  (vct: [vct_len]f32)
                    : [num_rows]f32 =
 
-  let shp_sc = scan (+) 0 mat_shp -- [num_rows]i32
-  -- TODO: fill in your implementation here.
-  --       for now, the function simply returns zeroes.
-  let flag = map (== 1) (mkFlagArray mat_shp 0 (replicate num_rows 1i32)) :> [num_elms]bool
-  let mult = map (\(i, v) -> vct[i] * v) mat_val -- [num_elms]f32
-  let sum_p = sgmScan (+) 0 flag mult -- [num_elms]f32
+  let shp_sc = scan (+) 0 mat_shp
+  let flg = map (== 1) (mkFlagArray mat_shp 0 (replicate num_rows 1i32)) :> [num_elms]bool
+  let mlt = map (\(i, v) -> vct[i] * v) mat_val 
+  let sum_p = sgmScan (+) 0 flg mlt 
    in map (\i -> sum_p[i-1]) shp_sc
+
 
 -- One may run with for example:
 -- $ futhark dataset --i64-bounds=0:9999 -g [1000000]i64 --f32-bounds=-7.0:7.0 -g [1000000]f32 --i64-bounds=100:100 -g [10000]i64 --f32-bounds=-10.0:10.0 -g [10000]f32 | ./spMVmult-seq -t /dev/stderr -n

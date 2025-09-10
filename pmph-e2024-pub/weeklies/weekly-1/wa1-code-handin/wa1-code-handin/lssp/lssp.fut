@@ -18,8 +18,6 @@ let lss_redOp (pred2: i32 -> i32 -> bool)
               ((y_lss, y_lis, y_lcs, y_len, y_first, y_last): lss_t)
                 : lss_t =
 
-  -- Weekly 1, task 2 -- LSSP
-  -- TODO: fill in the 5 missing values (indicated by `???`).
   let segments_connect =
     if x_len == 0
       then y_lis

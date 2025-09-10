@@ -75,7 +75,6 @@ int main(int argc, char** argv) {
 
     unsigned int B = 256;
     unsigned int numblocks = (N + B - 1) / B;
-    
     // a small number of dry runs
     for(int r = 0; r < 1; r++) {
         dim3 block(B, 1, 1), grid(numblocks, 1, 1);
