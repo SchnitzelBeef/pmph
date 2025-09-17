@@ -94,11 +94,11 @@ int main(int argc, char** argv) {
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         gpu_elapsed = (1.0 * (t_diff.tv_sec*1e6+t_diff.tv_usec)) / GPU_RUNS;
-        gpu_gigabytespersec = (2.0 * N * 4.0) / (gpu_elapsed * 1000.0);
+        gpu_gigabytespersec = (3.0 * N * 4.0) / (gpu_elapsed * 1000.0);
         printf("The kernel took on average %f microseconds. GB/sec: %f \n", gpu_elapsed, gpu_gigabytespersec);
     
-        double speedup = (cpu_elapsed - gpu_elapsed) / cpu_elapsed;
-        printf("Speedup := (cpu_elapsed - gpu_elapsed) / cpu_elapsed = %f \n", speedup);
+        double speedup = gpu_elapsed / cpu_elapsed;
+        printf("Speedup := gpu_elapsed / cpu_elapsed = %f \n", speedup);
     }
         
     // check for errors
